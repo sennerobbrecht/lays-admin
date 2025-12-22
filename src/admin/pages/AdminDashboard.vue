@@ -50,6 +50,7 @@
           <th>Inspiratie</th>
           <th>Smaken</th>
           <th>Gemaakt door</th>
+          <th>Votes</th>
         </tr>
       </thead>
 
@@ -66,8 +67,8 @@
               {{ flavour }}<span v-if="index < bag.keyFlavours.length - 1">, </span>
             </span>
           </td>
-          <td>{{ bag.user || "Onbekend" }}
-</td>
+          <td>{{ bag.user || "Onbekend" }}</td>
+          <td>{{ getVoteCount(bag._id) }}</td>
         </tr>
       </tbody>
     </table>
@@ -82,6 +83,7 @@ import axios from "axios";
 
 const users = ref([]);
 const bags = ref([]);
+const votes = ref([]);
 
 // ---------------- USERS ----------------
 const fetchUsers = async () => {
@@ -144,9 +146,35 @@ const fetchBags = async () => {
   }
 };
 
+// ---------------- VOTES ----------------
+const fetchVotes = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      "https://lays-api-1.onrender.com/api/v1/vote",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    votes.value = res.data;
+  } catch (err) {
+    console.error("Votes ophalen mislukt", err);
+  }
+};
+
+// helper: aantal votes per bag
+const getVoteCount = (bagId) => {
+  return votes.value.filter((vote) => vote.bag === bagId).length;
+};
+
 onMounted(() => {
   fetchUsers();
   fetchBags();
+  fetchVotes();
 });
 </script>
 
