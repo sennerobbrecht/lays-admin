@@ -3,7 +3,6 @@
     <h1>Admin Dashboard</h1>
     <p>Welkom! Dit is het admin overzicht.</p>
 
-    <!-- ================= USERS ================= -->
     <h2>Gebruikers</h2>
 
     <table v-if="users.length">
@@ -15,7 +14,6 @@
           <th>Actie</th>
         </tr>
       </thead>
-
       <tbody>
         <tr v-for="user in users" :key="user._id">
           <td>{{ user.email }}</td>
@@ -36,7 +34,6 @@
 
     <p v-else>Geen gebruikers gevonden.</p>
 
-    <!-- ================= BAGS ================= -->
     <h2>Zakken</h2>
 
     <table v-if="bags.length">
@@ -51,6 +48,7 @@
           <th>Smaken</th>
           <th>Gemaakt door</th>
           <th>Votes</th>
+          <th>Actie</th>
         </tr>
       </thead>
 
@@ -69,6 +67,11 @@
           </td>
           <td>{{ bag.user || "Onbekend" }}</td>
           <td>{{ getVoteCount(bag._id) }}</td>
+          <td>
+            <button class="danger" @click="deleteBag(bag._id)">
+              Verwijder
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -85,90 +88,59 @@ const users = ref([]);
 const bags = ref([]);
 const votes = ref([]);
 
-// ---------------- USERS ----------------
 const fetchUsers = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await axios.get(
-      "https://lays-api-1.onrender.com/api/v1/user",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    users.value = res.data;
-  } catch (err) {
-    console.error("Users ophalen mislukt", err);
-  }
+  const token = localStorage.getItem("token");
+  const res = await axios.get(
+    "https://lays-api-1.onrender.com/api/v1/user",
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  users.value = res.data;
 };
 
 const toggleBlock = async (user) => {
-  try {
-    const token = localStorage.getItem("token");
-
-    await axios.patch(
-      `https://lays-api-1.onrender.com/api/v1/user/${user._id}/block`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    // optimistic update
-    user.isBlocked = !user.isBlocked;
-  } catch (err) {
-    console.error("Blokkeren mislukt", err);
-  }
+  const token = localStorage.getItem("token");
+  await axios.patch(
+    `https://lays-api-1.onrender.com/api/v1/user/${user._id}/block`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  user.isBlocked = !user.isBlocked;
 };
 
-// ---------------- BAGS ----------------
 const fetchBags = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await axios.get(
-      "https://lays-api-1.onrender.com/api/v1/bag",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    bags.value = res.data;
-  } catch (err) {
-    console.error("Bags ophalen mislukt", err);
-  }
+  const token = localStorage.getItem("token");
+  const res = await axios.get(
+    "https://lays-api-1.onrender.com/api/v1/bag",
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  bags.value = res.data;
 };
 
-// ---------------- VOTES ----------------
 const fetchVotes = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await axios.get(
-      "https://lays-api-1.onrender.com/api/v1/vote",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    votes.value = res.data;
-  } catch (err) {
-    console.error("Votes ophalen mislukt", err);
-  }
+  const token = localStorage.getItem("token");
+  const res = await axios.get(
+    "https://lays-api-1.onrender.com/api/v1/vote",
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  votes.value = res.data;
 };
 
-// helper: aantal votes per bag
 const getVoteCount = (bagId) => {
-  return votes.value.filter((vote) => vote.bag === bagId).length;
+  return votes.value.filter(vote => vote.bag === bagId).length;
+};
+
+const deleteBag = async (bagId) => {
+  if (!confirm("Weet je zeker dat je deze zak wil verwijderen?")) return;
+
+  const token = localStorage.getItem("token");
+
+  await axios.delete(
+    `https://lays-api-1.onrender.com/api/v1/bag/${bagId}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  bags.value = bags.value.filter(bag => bag._id !== bagId);
+  votes.value = votes.value.filter(vote => vote.bag !== bagId);
 };
 
 onMounted(() => {
@@ -214,6 +186,15 @@ button {
 
 button:hover {
   background: #e5b800;
+}
+
+.danger {
+  background: #e53935;
+  color: white;
+}
+
+.danger:hover {
+  background: #c62828;
 }
 
 .blocked {
