@@ -44,12 +44,7 @@ const loginUser = async () => {
       }
     );
 
-    /**
-     * 👇 BELANGRIJK
-     * Bekijk exact wat je backend terugstuurt
-     * Meestal is dit:
-     * res.data.user
-     */
+
     const { token, user } = res.data;
 
     if (!user || user.isAdmin !== true) {
@@ -81,25 +76,25 @@ const loginUser = async () => {
   padding: 20px;
 }
 
-/* Grote, professionele card */
+
 .login-card {
   background: white;
-  width: 520px;          /* was 420px */
-  padding: 55px 60px;     /* meer ruimte */
+  width: 520px;         
+  padding: 55px 60px; 
   border-radius: 14px;
   box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-/* Grotere titel */
+
 .title {
   margin-bottom: 35px;
-  font-size: 32px;       /* was 26px */
+  font-size: 32px;      
   font-weight: 700;
   color: #1f1f1f;
 }
 
-/* Inputs groter + mooier */
+
 .input-group {
   margin-bottom: 22px;
   text-align: left;
@@ -114,18 +109,18 @@ const loginUser = async () => {
 
 .input-group input {
   width: 100%;
-  padding: 15px;           /* was 12px */
-  border-radius: 10px;     /* mooier */
+  padding: 15px;          
+  border-radius: 10px;    
   border: 1px solid #cccccc;
-  font-size: 16px;         /* was 15px */
+  font-size: 16px;      
 }
 
-/* Knop stijlvoller */
+
 .btn-login {
   width: 100%;
   background: #ffcc00;
   color: #1f1f1f;
-  padding: 16px;           /* was 14px */
+  padding: 16px;         
   border: none;
   border-radius: 10px;
   font-weight: 700;
@@ -138,7 +133,7 @@ const loginUser = async () => {
   background: #e5b800;
 }
 
-/* Error styling */
+
 .error {
   margin-top: 20px;
   color: #d40000;
