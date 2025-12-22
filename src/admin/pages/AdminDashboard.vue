@@ -3,6 +3,7 @@
     <h1>Admin Dashboard</h1>
     <p>Welkom! Dit is het admin overzicht.</p>
 
+    <!-- ================= USERS ================= -->
     <h2>Gebruikers</h2>
 
     <table v-if="users.length">
@@ -34,6 +35,44 @@
     </table>
 
     <p v-else>Geen gebruikers gevonden.</p>
+
+    <!-- ================= BAGS ================= -->
+    <h2>Zakken</h2>
+
+    <table v-if="bags.length">
+      <thead>
+        <tr>
+          <th>Naam</th>
+          <th>Kleur</th>
+          <th>Font</th>
+          <th>Pattern</th>
+          <th>Packaging</th>
+          <th>Inspiratie</th>
+          <th>Smaken</th>
+          <th>Gemaakt door</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr v-for="bag in bags" :key="bag._id">
+          <td>{{ bag.name }}</td>
+          <td>{{ bag.bagColor }}</td>
+          <td>{{ bag.font }}</td>
+          <td>{{ bag.pattern }}</td>
+          <td>{{ bag.packaging }}</td>
+          <td>{{ bag.inspiration }}</td>
+          <td>
+            <span v-for="(flavour, index) in bag.keyFlavours" :key="index">
+              {{ flavour }}<span v-if="index < bag.keyFlavours.length - 1">, </span>
+            </span>
+          </td>
+          <td>{{ bag.user || "Onbekend" }}
+</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p v-else>Geen zakken gevonden.</p>
   </div>
 </template>
 
@@ -42,7 +81,9 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const users = ref([]);
+const bags = ref([]);
 
+// ---------------- USERS ----------------
 const fetchUsers = async () => {
   try {
     const token = localStorage.getItem("token");
@@ -76,14 +117,37 @@ const toggleBlock = async (user) => {
       }
     );
 
-    // lijst opnieuw laden
-    fetchUsers();
+    // optimistic update
+    user.isBlocked = !user.isBlocked;
   } catch (err) {
     console.error("Blokkeren mislukt", err);
   }
 };
 
-onMounted(fetchUsers);
+// ---------------- BAGS ----------------
+const fetchBags = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      "https://lays-api-1.onrender.com/api/v1/bag",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    bags.value = res.data;
+  } catch (err) {
+    console.error("Bags ophalen mislukt", err);
+  }
+};
+
+onMounted(() => {
+  fetchUsers();
+  fetchBags();
+});
 </script>
 
 <style scoped>
@@ -93,7 +157,7 @@ h1 {
 }
 
 h2 {
-  margin-top: 30px;
+  margin-top: 40px;
   margin-bottom: 10px;
 }
 
@@ -108,6 +172,7 @@ td {
   padding: 10px;
   border-bottom: 1px solid #ddd;
   text-align: left;
+  vertical-align: top;
 }
 
 button {
