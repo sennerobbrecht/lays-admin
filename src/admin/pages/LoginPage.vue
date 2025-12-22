@@ -25,24 +25,53 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 const email = ref("");
 const password = ref("");
 const error = ref(null);
 const router = useRouter();
 
-const loginUser = () => {
-  if (email.value === "admin@admin.com" && password.value === "Admin") {
+const loginUser = async () => {
+  error.value = null;
+
+  try {
+    const res = await axios.post(
+      "https://lays-api-1.onrender.com/api/v1/user/login",
+      {
+        email: email.value,
+        password: password.value,
+      }
+    );
+
+    /**
+     * 👇 BELANGRIJK
+     * Bekijk exact wat je backend terugstuurt
+     * Meestal is dit:
+     * res.data.user
+     */
+    const { token, user } = res.data;
+
+    if (!user || user.isAdmin !== true) {
+      error.value = "You are not authorized as admin";
+      return;
+    }
+
+    localStorage.setItem("token", token);
     localStorage.setItem("isAdmin", "true");
+    localStorage.setItem("userEmail", user.email);
+
     router.push("/admin");
-  } else {
-    error.value = "Incorrect credentials";
+
+  } catch (err) {
+    error.value = "Invalid email or password";
   }
 };
 </script>
 
+
+
 <style scoped>
-/* Fullscreen center */
 .login-container {
   display: flex;
   justify-content: center;
@@ -52,55 +81,55 @@ const loginUser = () => {
   padding: 20px;
 }
 
-/* Card */
+/* Grote, professionele card */
 .login-card {
   background: white;
-  width: 420px;
-  padding: 40px 45px;
-  border-radius: 12px;
-  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
+  width: 520px;          /* was 420px */
+  padding: 55px 60px;     /* meer ruimte */
+  border-radius: 14px;
+  box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-/* Title */
+/* Grotere titel */
 .title {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 26px;
+  margin-bottom: 35px;
+  font-size: 32px;       /* was 26px */
   font-weight: 700;
   color: #1f1f1f;
 }
 
-/* Inputs */
+/* Inputs groter + mooier */
 .input-group {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   text-align: left;
 }
 
 .input-group label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 15px;
+  margin-bottom: 7px;
+  font-size: 16px;
   color: #555;
 }
 
 .input-group input {
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #d1d1d1;
-  font-size: 15px;
+  padding: 15px;           /* was 12px */
+  border-radius: 10px;     /* mooier */
+  border: 1px solid #cccccc;
+  font-size: 16px;         /* was 15px */
 }
 
-/* Button */
+/* Knop stijlvoller */
 .btn-login {
   width: 100%;
   background: #ffcc00;
   color: #1f1f1f;
-  padding: 14px;
+  padding: 16px;           /* was 14px */
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 18px;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -109,10 +138,11 @@ const loginUser = () => {
   background: #e5b800;
 }
 
-/* Error */
+/* Error styling */
 .error {
-  margin-top: 15px;
-  color: red;
-  text-align: center;
+  margin-top: 20px;
+  color: #d40000;
+  font-size: 16px;
 }
+
 </style>
