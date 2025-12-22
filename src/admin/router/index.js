@@ -23,13 +23,12 @@ const routes = [
   },
 ];
 
-export const adminRouter = createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-
-adminRouter.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
   const isAdmin = localStorage.getItem("isAdmin");
 
@@ -41,3 +40,5 @@ adminRouter.beforeEach((to, from, next) => {
 
   next();
 });
+
+export default router;
