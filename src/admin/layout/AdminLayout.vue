@@ -1,51 +1,57 @@
 <template>
-  <div class="layout">
-    <aside class="sidebar">
+  <div class="admin-layout">
+    <header class="admin-header">
       <h2>Admin Panel</h2>
 
-      <ul class="menu">
-        <li><router-link to="/admin">Dashboard</router-link></li>
-      </ul>
-    </aside>
+      <button @click="logout" class="logout-btn">
+        Logout
+      </button>
+    </header>
 
-    <main class="content">
+    <main>
       <router-view />
     </main>
   </div>
 </template>
 
-<style>
-.layout {
+<script setup>
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("isAdmin");
+  localStorage.removeItem("userEmail");
+
+  router.push("/login");
+};
+</script>
+
+<style scoped>
+.admin-header {
   display: flex;
-  height: 100vh;
-  background: #f5f5f5;
-}
-
-.sidebar {
-  width: 240px;
-  background: #222;
-  color: #fff;
-  padding: 20px;
-}
-
-.menu {
-  margin-top: 20px;
-  padding: 0;
-  list-style: none;
-}
-
-.menu li {
-  margin-bottom: 12px;
-}
-
-.menu a {
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: #1f1f1f;
   color: white;
-  text-decoration: none;
 }
 
-.content {
-  flex: 1;
+.logout-btn {
+  background: #ffcc00;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #e5b800;
+}
+
+main {
   padding: 30px;
-  overflow-y: auto;
 }
 </style>

@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 h1 {
   font-size: 28px;
   margin-bottom: 10px;
