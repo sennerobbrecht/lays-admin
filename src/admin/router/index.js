@@ -4,6 +4,10 @@ import AdminDashboard from "../pages/AdminDashboard.vue";
 import Login from "../pages/LoginPage.vue";
 
 const routes = [
+    {
+    path: "/",
+    redirect: "/login",
+  },
   {
     path: "/login",
     name: "Login",
