@@ -66,7 +66,7 @@
             </span>
           </td>
           <td>{{ bag.user || "Onbekend" }}</td>
-          <td>{{ getVoteCount(bag._id) }}</td>
+          <td>{{ voteCounts[bag._id] ?? 0 }}</td>
           <td>
             <button class="danger" @click="deleteBag(bag._id)">
               Verwijder
@@ -81,73 +81,70 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, onMounted, onUnmounted } from "vue"
+import axios from "axios"
+import { io } from "socket.io-client"
 
-const users = ref([]);
-const bags = ref([]);
-const votes = ref([]);
+const users = ref([])
+const bags = ref([])
+const voteCounts = ref({})
+
+const socket = io("https://lays-api-1.onrender.com")
+
+socket.on("vote-updated", data => {
+  voteCounts.value[data.bagId] = data.count
+})
 
 const fetchUsers = async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token")
   const res = await axios.get(
     "https://lays-api-1.onrender.com/api/v1/user",
     { headers: { Authorization: `Bearer ${token}` } }
-  );
-  users.value = res.data;
-};
+  )
+  users.value = res.data
+}
 
-const toggleBlock = async (user) => {
-  const token = localStorage.getItem("token");
+const toggleBlock = async user => {
+  const token = localStorage.getItem("token")
   await axios.patch(
     `https://lays-api-1.onrender.com/api/v1/user/${user._id}/block`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
-  );
-  user.isBlocked = !user.isBlocked;
-};
+  )
+  user.isBlocked = !user.isBlocked
+}
 
 const fetchBags = async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token")
   const res = await axios.get(
     "https://lays-api-1.onrender.com/api/v1/bag",
     { headers: { Authorization: `Bearer ${token}` } }
-  );
-  bags.value = res.data;
-};
+  )
+  bags.value = res.data
+  bags.value.forEach(bag => {
+    voteCounts.value[bag._id] = bag.votes || 0
+  })
+}
 
-const fetchVotes = async () => {
-  const token = localStorage.getItem("token");
-  const res = await axios.get(
-    "https://lays-api-1.onrender.com/api/v1/vote",
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  votes.value = res.data;
-};
-
-const getVoteCount = (bagId) => {
-  return votes.value.filter(vote => vote.bag === bagId).length;
-};
-
-const deleteBag = async (bagId) => {
-  if (!confirm("Weet je zeker dat je deze zak wil verwijderen?")) return;
-
-  const token = localStorage.getItem("token");
-
+const deleteBag = async bagId => {
+  if (!confirm("Weet je zeker dat je deze zak wil verwijderen?")) return
+  const token = localStorage.getItem("token")
   await axios.delete(
     `https://lays-api-1.onrender.com/api/v1/bag/${bagId}`,
     { headers: { Authorization: `Bearer ${token}` } }
-  );
-
-  bags.value = bags.value.filter(bag => bag._id !== bagId);
-  votes.value = votes.value.filter(vote => vote.bag !== bagId);
-};
+  )
+  bags.value = bags.value.filter(bag => bag._id !== bagId)
+  delete voteCounts.value[bagId]
+}
 
 onMounted(() => {
-  fetchUsers();
-  fetchBags();
-  fetchVotes();
-});
+  fetchUsers()
+  fetchBags()
+})
+
+onUnmounted(() => {
+  socket.disconnect()
+})
 </script>
 
 <style scoped>
